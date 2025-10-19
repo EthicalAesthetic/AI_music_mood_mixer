@@ -16,6 +16,7 @@
                 <div class="search-bar-wrap">
                     <input class="search-bar" type="text" id="searchInput" placeholder="Search a song..." autocomplete="off">
                     <i class="fa-brands fa-searchengin searchengin-icon"></i>
+                    <ul id="searchResults" class="search-results"></ul>
                 </div>
                 <button class="upload-btn" id="uploadBtn" title="Upload Song">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -65,10 +66,9 @@
         </div>
         <img src="https://media.giphy.com/media/du8yT5dStTeMg/giphy.gif" alt="Visualizer" class="player-gif">
     </div>
-    <!-- Hidden audio element used for playback of uploaded file -->
-    <audio id="audioElement" hidden></audio>
+
+    <!-- Spotify SDK -->
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-
-
