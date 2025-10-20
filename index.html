@@ -1,74 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Mood Mixer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Font Awesome CDN for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>AI Mood Mixer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="bg-blob" aria-hidden="true"></div>
-    <nav class="navbar">
-        <div class="navbar-center">
-            <div class="search-upload">
-                <div class="search-bar-wrap">
-                    <input class="search-bar" type="text" id="searchInput" placeholder="Search a song..." autocomplete="off">
-                    <i class="fa-brands fa-searchengin searchengin-icon"></i>
-                    <ul id="searchResults" class="search-results"></ul>
-                </div>
-                <button class="upload-btn" id="uploadBtn" title="Upload Song">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                </button>
-                <input type="file" id="fileInput" accept="audio/*" hidden>
-            </div>
+  <div class="bg-blob" aria-hidden="true"></div>
+
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="navbar-center">
+      <div class="search-upload">
+        <div class="search-bar-wrap">
+          <input
+            class="search-bar"
+            type="text"
+            id="searchInput"
+            placeholder="Search a song..."
+            autocomplete="off"
+          />
+          <i class="fa-brands fa-searchengin searchengin-icon"></i>
+          <ul id="searchResults" class="search-results"></ul>
         </div>
-        <button class="nav-hamburger" id="hamburgerBtn" title="Menu">
-            <i class="fa-solid fa-bars"></i>
+        <button class="upload-btn" id="uploadBtn" title="Upload Song">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
         </button>
-    </nav>
-    
-    <div class="floating-menu" id="floatingMenu">
-        <button class="floating-close" id="closeMenuBtn">&times;</button>
-        <div class="panel-links">
-            <button><i class="fa-solid fa-house"></i> Home</button>
-            <button><i class="fa-solid fa-circle-info"></i> About</button>
-            <button><i class="fa-solid fa-gear"></i> Settings</button>
-            <button><i class="fa-solid fa-envelope"></i> Contact</button>
-        </div>
+        <input type="file" id="fileInput" accept="audio/*" hidden />
+      </div>
+    </div>
+    <button class="nav-hamburger" id="hamburgerBtn" title="Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </nav>
+
+  <!-- ===== Floating Menu ===== -->
+  <div class="floating-menu" id="floatingMenu">
+    <button class="floating-close" id="closeMenuBtn">&times;</button>
+    <div class="panel-links">
+      <button><i class="fa-solid fa-house"></i> Home</button>
+      <button><i class="fa-solid fa-circle-info"></i> About</button>
+      <button><i class="fa-solid fa-gear"></i> Settings</button>
+      <button><i class="fa-solid fa-envelope"></i> Contact</button>
+    </div>
+  </div>
+
+  <!-- ===== Main Section ===== -->
+  <main class="main-section">
+    <div
+      class="expanded-song-display"
+      id="expandedSongDisplay"
+      style="display: none"
+    >
+      <div id="homeSongTitle">No song selected</div>
+      <img
+        src="https://media.giphy.com/media/du8yT5dStTeMg/giphy.gif"
+        id="songGif"
+        alt="Music Visualizer"
+        style="margin: 1rem auto 0 auto; display: block; width: 120px; height: 120px"
+      />
     </div>
 
-    <main class="main-section">
-        <div class="expanded-song-display" id="expandedSongDisplay" style="display:none;">
-            <div id="homeSongTitle">No song selected</div>
-            <img src="https://media.giphy.com/media/du8yT5dStTeMg/giphy.gif" id="songGif" alt="Music Visualizer" style="margin:1rem auto 0 auto;display:block;width:120px;height:120px;">
-        </div>
-        <div class="song-display" id="songDisplay">
-            <p>No song selected</p>
-        </div>
-        <button class="analyze-btn" id="analyzeBtn">Analyze Mood</button>
-    </main>
-    <div class="music-bar" id="musicBar">
-        <div class="music-bar-collapsed" id="musicBarCollapsed">
-            <button class="music-icon-btn" id="waveIconBtn" title="Show Player">
-                <i class="fa-solid fa-wave-square"></i>
-            </button>
-        </div>
-    </div>
-    <div class="floating-player" id="floatingPlayer">
-        <button class="floating-close" id="closePlayerBtn">&times;</button>
-        <div class="player-song-title" id="expandedSongNameCenter">No song selected</div>
-        <div class="player-controls">
-            <button class="player-btn" id="prevTrack" title="Previous">&#9198;</button>
-            <button class="player-btn" id="playPause" title="Play"></button>
-            <button class="player-btn" id="nextTrack" title="Next">&#9197;</button>
-        </div>
-        <img src="https://media.giphy.com/media/du8yT5dStTeMg/giphy.gif" alt="Visualizer" class="player-gif">
+    <div class="song-display" id="songDisplay">
+      <p>No song selected</p>
     </div>
 
-    <!-- Spotify SDK -->
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
-    <script src="script.js"></script>
+    <button class="analyze-btn" id="analyzeBtn">Analyze Mood</button>
+  </main>
+
+  <!-- ===== Collapsed Music Bar ===== -->
+  <div class="music-bar" id="musicBar">
+    <div class="music-bar-collapsed" id="musicBarCollapsed">
+      <button class="music-icon-btn" id="waveIconBtn" title="Show Player">
+        <i class="fa-solid fa-wave-square"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== Floating Player ===== -->
+  <div class="floating-player" id="floatingPlayer" style="display: none">
+    <button class="floating-close" id="closePlayerBtn">&times;</button>
+    <div class="player-song-title" id="expandedSongNameCenter">
+      No song selected
+    </div>
+    <div class="player-controls">
+      <button class="player-btn" id="prevTrack" title="Previous">&#9198;</button>
+      <button class="player-btn" id="playPause" title="Play"></button>
+      <button class="player-btn" id="nextTrack" title="Next">&#9197;</button>
+    </div>
+    <img
+      src="https://media.giphy.com/media/du8yT5dStTeMg/giphy.gif"
+      alt="Visualizer"
+      class="player-gif"
+    />
+  </div>
+
+  <!-- Hidden audio element (must be above JS) -->
+  <audio id="audioElement" controls style="display: none"></audio>
+
+  <!-- ===== Scripts ===== -->
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

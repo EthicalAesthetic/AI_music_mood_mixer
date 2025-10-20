@@ -80,5 +80,77 @@ app.get("/api/search", async (req, res) => {
     res.status(500).json({ error: "Error fetching from Spotify" });
   }
 });
+// --- Add this after your /api/search endpoint ---
+
+import multer from "multer";
+import fs from "fs";
+
+// Set up multer for file uploads
+const upload = multer({ dest: "uploads/" });
+
+// Mock Mood Analysis (You can later replace with real AI model)
+function predictMoodFromAudio(filePath) {
+  // Placeholder: In a real scenario, extract features using librosa, tensorflow, etc.
+  const moods = ["happy", "sad", "angry", "joyful", "sarcastic", "emotional", "depressed", "calm"];
+  // Simulate random mood prediction
+  const randomMood = moods[Math.floor(Math.random() * moods.length)];
+  return randomMood;
+}
+
+// Endpoint to analyze uploaded audio mood
+app.post("/api/analyze", upload.single("song"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+  try {
+    const mood = predictMoodFromAudio(req.file.path);
+    fs.unlink(req.file.path, () => {}); // delete file after processing
+    res.json({ mood });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error analyzing song mood" });
+  }
+});
+
+// Spotify mood-based recommendations
+app.get("/api/recommendations", async (req, res) => {
+  const { mood } = req.query;
+  if (!mood) return res.status(400).json({ error: "Missing mood" });
+
+  try {
+    let response = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+        mood
+      )}&type=track&limit=6`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+
+    // Retry if token expired
+    if (response.status === 401) {
+      console.log("⚠️ Token expired, fetching new one...");
+      await getAccessToken();
+      response = await fetch(
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+          mood
+        )}&type=track&limit=6`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+    }
+
+    const data = await response.json();
+    if (!data.tracks?.items) return res.json({ tracks: [] });
+
+    const tracks = data.tracks.items.map((t) => ({
+      name: t.name,
+      artist: t.artists[0].name,
+      image: t.album.images[0]?.url,
+      preview_url: t.preview_url,
+    }));
+
+    res.json({ tracks });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error fetching recommendations" });
+  }
+});
 
 app.listen(3000, () => console.log("✅ Backend running on http://localhost:3000"));
