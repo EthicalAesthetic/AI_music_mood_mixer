@@ -12,6 +12,8 @@ const homeSongTitle = document.getElementById("homeSongTitle");
 const analyzeBtn = document.getElementById("analyzeBtn");
 
 let isPlaying = false;
+let spotifyPlayer;
+let deviceId = null;
 
 // ======== Player Icon Logic ========
 function updatePlayPauseIcon() {
@@ -22,16 +24,68 @@ function updatePlayPauseIcon() {
 }
 updatePlayPauseIcon();
 
+// ======== Spotify Web Playback SDK Setup ========
+window.onSpotifyWebPlaybackSDKReady = () => {
+  fetch("http://localhost:3000/api/token")
+    .then(res => res.json())
+    .then(({ access_token }) => {
+      spotifyPlayer = new Spotify.Player({
+        name: "AI Mood Mixer Web Player",
+        getOAuthToken: cb => cb(access_token),
+        volume: 0.8,
+      });
+
+      spotifyPlayer.addListener("ready", ({ device_id }) => {
+        console.log("Spotify Player Ready with Device ID:", device_id);
+        deviceId = device_id;
+      });
+
+      spotifyPlayer.addListener("not_ready", ({ device_id }) => {
+        console.warn("Device ID has gone offline", device_id);
+      });
+
+      spotifyPlayer.connect();
+    });
+};
+
+// ======== Spotify Play Function ========
+async function playTrack(trackUri) {
+  if (!deviceId) {
+    alert("Spotify player not ready yet. Please wait a moment.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/play?device_id=${deviceId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uri: trackUri }),
+    });
+
+    if (!res.ok) throw new Error("Playback failed");
+    floatingPlayer.style.display = "block";
+    isPlaying = true;
+    updatePlayPauseIcon();
+  } catch (err) {
+    console.error("Spotify play error:", err);
+    alert("Could not play this track with Spotify.");
+  }
+}
+
 // ======== Play / Pause Button ========
 playPauseBtn.onclick = () => {
-  if (!audioEl.src) return;
+  if (!audioEl.src && !spotifyPlayer) return;
   isPlaying = !isPlaying;
-  if (isPlaying)
-    audioEl.play().catch(() => {
-      isPlaying = false;
-      updatePlayPauseIcon();
-    });
-  else audioEl.pause();
+  if (audioEl.src) {
+    if (isPlaying)
+      audioEl.play().catch(() => {
+        isPlaying = false;
+        updatePlayPauseIcon();
+      });
+    else audioEl.pause();
+  } else if (spotifyPlayer) {
+    spotifyPlayer.togglePlay();
+  }
   updatePlayPauseIcon();
 };
 
@@ -53,17 +107,15 @@ fileInput.addEventListener("change", (e) => {
   audioEl.src = URL.createObjectURL(file);
   audioEl.load();
 
-  // Don't autoplay here — let the user press play
   floatingPlayer.style.display = "block";
   expandedSongNameCenter.textContent = file.name;
-  document.getElementById("songDisplay").innerHTML = `<p>${file.name}</p>`;
-  document.getElementById("expandedSongDisplay").style.display = "block";
-  document.getElementById("homeSongTitle").textContent = file.name;
+  songDisplay.innerHTML = `<p>${file.name}</p>`;
+  expandedSongDisplay.style.display = "block";
+  homeSongTitle.textContent = file.name;
 
   isPlaying = false;
   updatePlayPauseIcon();
 });
-
 
 // ======== Analyze Mood ========
 analyzeBtn.addEventListener("click", async () => {
@@ -80,7 +132,7 @@ analyzeBtn.addEventListener("click", async () => {
     const formData = new FormData();
     formData.append("song", file);
 
-    const response = await fetch("https://ai-music-mood-mixer-1.onrender.com/api/analyze", {
+    const response = await fetch("http://localhost:3000/api/analyze", {
       method: "POST",
       body: formData,
     });
@@ -91,7 +143,7 @@ analyzeBtn.addEventListener("click", async () => {
     homeSongTitle.textContent = `Mood: ${mood.toUpperCase()}`;
 
     const recRes = await fetch(
-      `https://ai-music-mood-mixer-1.onrender.com/api/recommendations?mood=${mood}`
+      `http://localhost:3000/api/recommendations?mood=${mood}`
     );
     const recData = await recRes.json();
 
@@ -103,6 +155,7 @@ analyzeBtn.addEventListener("click", async () => {
             .map(
               (t) => `
             <li style="margin:6px 0;cursor:pointer;display:flex;align-items:center;gap:10px;"
+                data-uri="${t.uri || ""}"
                 data-preview="${t.preview_url || ""}">
                 <img src="${t.image}" style="width:40px;height:40px;border-radius:6px;">
                 <span>${t.name} - ${t.artist}</span>
@@ -117,25 +170,29 @@ analyzeBtn.addEventListener("click", async () => {
       expandedSongDisplay.innerHTML = `<div id="homeSongTitle">Mood: ${mood.toUpperCase()}</div><p>No recommendations found.</p>`;
     }
 
-    expandedSongDisplay
-      .querySelectorAll("li[data-preview]")
-      .forEach((li) => {
-        li.addEventListener("click", () => {
-          const url = li.dataset.preview;
-          if (!url || url === "null") {
-            alert("No preview available for this song.");
-            return;
-          }
-          audioEl.src = url;
+    // ======== Click to Play Recommendation ========
+    expandedSongDisplay.querySelectorAll("li").forEach((li) => {
+      li.addEventListener("click", () => {
+        const uri = li.dataset.uri;
+        const preview = li.dataset.preview;
+        const trackName = li.querySelector("span").textContent;
+
+        if (uri) {
+          playTrack(uri);
+          expandedSongNameCenter.textContent = trackName;
+        } else if (preview) {
+          audioEl.src = preview;
           audioEl.load();
           audioEl.play();
-          expandedSongNameCenter.textContent =
-            li.querySelector("span").textContent;
+          expandedSongNameCenter.textContent = trackName;
           floatingPlayer.style.display = "block";
           isPlaying = true;
           updatePlayPauseIcon();
-        });
+        } else {
+          alert("No playback available for this song.");
+        }
       });
+    });
   } catch (err) {
     console.error(err);
     alert("Error analyzing mood. Try again.");
@@ -154,14 +211,14 @@ searchInput.addEventListener("keyup", async (e) => {
   }
 
   if (e.key === "Enter") {
-    const firstLi = searchResults.querySelector("li[data-preview]");
+    const firstLi = searchResults.querySelector("li[data-uri]");
     if (firstLi) firstLi.click();
     return;
   }
 
   try {
     const res = await fetch(
-      `https://ai-music-mood-mixer-1.onrender.com/api/search?q=${encodeURIComponent(query)}`
+      `http://localhost:3000/api/search?q=${encodeURIComponent(query)}`
     );
     const data = await res.json();
 
@@ -174,7 +231,7 @@ searchInput.addEventListener("keyup", async (e) => {
     searchResults.innerHTML = data.tracks
       .map(
         (track) => `
-        <li data-preview="${track.preview_url || ""}">
+        <li data-uri="${track.uri || ""}" data-preview="${track.preview_url || ""}">
           <img src="${track.image || ""}" alt="album cover">
           <span>${track.name} - ${track.artist}</span>
         </li>`
@@ -193,25 +250,28 @@ searchResults.addEventListener("click", (e) => {
   const li = e.target.closest("li");
   if (!li) return;
 
+  const uri = li.dataset.uri;
   const previewUrl = li.dataset.preview;
   const trackName = li.querySelector("span").textContent;
 
-  if (!previewUrl || previewUrl === "null") {
-    alert("No preview available for this track.");
-    return;
+  if (uri) {
+    playTrack(uri);
+    expandedSongNameCenter.textContent = trackName;
+  } else if (previewUrl) {
+    audioEl.src = previewUrl;
+    audioEl.load();
+    audioEl.play().catch((err) => {
+      console.error("Playback failed", err);
+      alert("Playback failed. This track cannot be played.");
+    });
+    expandedSongNameCenter.textContent = trackName;
+    floatingPlayer.style.display = "block";
+    isPlaying = true;
+    updatePlayPauseIcon();
+  } else {
+    alert("No preview or Spotify URI available for this track.");
   }
 
-  audioEl.src = previewUrl;
-  audioEl.load();
-  audioEl.play().catch((err) => {
-    console.error("Playback failed", err);
-    alert("Playback failed. This track cannot be played.");
-  });
-
-  expandedSongNameCenter.textContent = trackName;
-  floatingPlayer.style.display = "block";
-  isPlaying = true;
-  updatePlayPauseIcon();
   searchResults.style.display = "none";
 });
 
