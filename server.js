@@ -150,7 +150,12 @@ app.get("/api/recommendations", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error fetching recommendations" });
-  }
+  }x
+});
+app.get("/", (req, res) => {
+  res.send("✅ Backend is running successfully on Render!");
 });
 
-app.listen(3000, () => console.log("✅ Backend running on http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Backend running on port ${PORT}`));
+
