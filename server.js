@@ -153,4 +153,8 @@ app.get("/api/recommendations", async (req, res) => {
   }
 });
 
+app.get("/", (req, res) => {
+  res.send("✅ Backend is running successfully on Render!");
+});
+const PORT = process.env.PORT || 3000;
 app.listen(3000, () => console.log("✅ Backend running on http://localhost:3000"));
