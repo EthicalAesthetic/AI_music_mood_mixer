@@ -84,7 +84,7 @@ analyzeBtn.addEventListener("click", async () => {
     const formData = new FormData();
     formData.append("song", file);
 
-    const response = await fetch("http://ai-music-mood-mixer-1.onrender.com/api/analyze", {
+    const response = await fetch("https://ai-music-mood-mixer-1.onrender.com/api/analyze", {
       method: "POST",
       body: formData,
     });
@@ -95,7 +95,7 @@ analyzeBtn.addEventListener("click", async () => {
     homeSongTitle.textContent = `Mood: ${mood.toUpperCase()}`;
 
     const recRes = await fetch(
-      `http://ai-music-mood-mixer-1.onrender.com/api/recommendations?mood=${mood}`
+      `https://ai-music-mood-mixer-1.onrender.com/api/recommendations?mood=${mood}`
     );
     const recData = await recRes.json();
 
@@ -165,7 +165,7 @@ searchInput.addEventListener("keyup", async (e) => {
 
   try {
     const res = await fetch(
-      `http://ai-music-mood-mixer-1.onrender.com/api/search?q=${encodeURIComponent(query)}`
+      `https://ai-music-mood-mixer-1.onrender.com/api/search?q=${encodeURIComponent(query)}`
     );
     const data = await res.json();
 
