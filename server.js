@@ -3,8 +3,6 @@ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
-import multer from "multer";
-import fs from "fs";
 
 dotenv.config();
 const app = express();
@@ -131,9 +129,15 @@ app.get("/api/search", async (req, res) => {
     res.status(500).json({ error: "Error fetching from Spotify" });
   }
 });
+// --- Add this after your /api/search endpoint ---
 
-// Mood Analysis (unchanged)
+import multer from "multer";
+import fs from "fs";
+
+// Set up multer for file uploads
 const upload = multer({ dest: "uploads/" });
+
+// Mock Mood Analysis (You can later replace with real AI model)
 function predictMoodFromAudio(filePath) {
   const moods = [
     "happy",
