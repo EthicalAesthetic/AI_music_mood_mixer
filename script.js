@@ -118,13 +118,10 @@ fileInput.addEventListener("change", async (e) => {
 
   floatingPlayer.style.display = "block";
   expandedSongNameCenter.textContent = file.name;
-  document.getElementById("songDisplay").innerHTML = `<p>${file.name}</p>`;
-  document.getElementById("expandedSongDisplay").style.display = "block";
-  document.getElementById("homeSongTitle").textContent = file.name;
-
   isPlaying = false;
   updatePlayPauseIcon();
 });
+
 
 
 // ======== Analyze Mood ========

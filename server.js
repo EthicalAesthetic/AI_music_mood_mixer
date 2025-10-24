@@ -3,6 +3,22 @@ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+
+const upload = multer({ dest: "uploads/" });
+
+app.use("/uploads", express.static("uploads"));
+
+app.post("/api/upload", upload.single("song"), (req, res) => {
+  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  res.json({ url: fileUrl });
+});
+
+app.listen(3000, () => console.log("✅ Server running on port 3000"));
+
 
 dotenv.config();
 const app = express();
@@ -131,11 +147,7 @@ app.get("/api/search", async (req, res) => {
 });
 // --- Add this after your /api/search endpoint ---
 
-import multer from "multer";
-import fs from "fs";
-
 // Set up multer for file uploads
-const upload = multer({ dest: "uploads/" });
 
 // Mock Mood Analysis (You can later replace with real AI model)
 function predictMoodFromAudio(filePath) {
