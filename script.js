@@ -104,17 +104,23 @@ fileInput.addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
+  // Load the selected audio file
   audioEl.src = URL.createObjectURL(file);
   audioEl.load();
 
+  // Update UI
   floatingPlayer.style.display = "block";
   expandedSongNameCenter.textContent = file.name;
   songDisplay.innerHTML = `<p>${file.name}</p>`;
   expandedSongDisplay.style.display = "block";
   homeSongTitle.textContent = file.name;
 
+  // Reset play state
   isPlaying = false;
   updatePlayPauseIcon();
+
+  // Optional: auto-play on upload
+  // audioEl.play(); isPlaying = true; updatePlayPauseIcon();
 });
 
 // ======== Analyze Mood ========
