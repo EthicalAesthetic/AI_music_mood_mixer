@@ -100,29 +100,28 @@ document.getElementById("closePlayerBtn").onclick = () => {
 // ======== Upload Button ========
 document.getElementById("uploadBtn").onclick = () => fileInput.click();
 
-fileInput.addEventListener("change", async (e) => {
+fileInput.addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  const formData = new FormData();
-  formData.append("song", file);
-
-  const res = await fetch("https://https://ai-music-mood-mixer-1.onrender.com/api/upload", {
-    method: "POST",
-    body: formData
-  });
-
-  const data = await res.json();
-  audioEl.src = data.url;
+  // Load the selected audio file
+  audioEl.src = URL.createObjectURL(file);
   audioEl.load();
 
+  // Update UI
   floatingPlayer.style.display = "block";
   expandedSongNameCenter.textContent = file.name;
+  songDisplay.innerHTML = `<p>${file.name}</p>`;
+  expandedSongDisplay.style.display = "block";
+  homeSongTitle.textContent = file.name;
+
+  // Reset play state
   isPlaying = false;
   updatePlayPauseIcon();
+
+  // Optional: auto-play on upload
+  // audioEl.play(); isPlaying = true; updatePlayPauseIcon();
 });
-
-
 
 // ======== Analyze Mood ========
 analyzeBtn.addEventListener("click", async () => {
