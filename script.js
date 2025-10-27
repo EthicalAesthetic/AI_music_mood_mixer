@@ -10,6 +10,12 @@ const songDisplay = document.getElementById("songDisplay");
 const expandedSongDisplay = document.getElementById("expandedSongDisplay");
 const homeSongTitle = document.getElementById("homeSongTitle");
 const analyzeBtn = document.getElementById("analyzeBtn");
+// Burger menu open/close
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const floatingMenu = document.getElementById('floatingMenu');
+const closeMenuBtn = document.getElementById('closeMenuBtn');
+hamburgerBtn.onclick = () => { floatingMenu.style.display = 'block'; };
+closeMenuBtn.onclick = () => { floatingMenu.style.display = 'none'; };
 
 let isPlaying = false;
 let spotifyPlayer;
@@ -170,7 +176,7 @@ analyzeBtn.addEventListener("click", async () => {
             .join("")}
         </ul>`;
       expandedSongDisplay.innerHTML = `
-        <div id="homeSongTitle">Mood: ${mood.toUpperCase()}</div>
+        <div id="mooditle">Mood: ${mood.toUpperCase()}</div>
         ${recHTML}`;
     } else {
       expandedSongDisplay.innerHTML = `<div id="homeSongTitle">Mood: ${mood.toUpperCase()}</div><p>No recommendations found.</p>`;
@@ -293,3 +299,4 @@ audioEl.addEventListener("ended", () => {
   isPlaying = false;
   updatePlayPauseIcon();
 });
+
