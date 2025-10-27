@@ -252,7 +252,7 @@ searchInput.addEventListener("keyup", async (e) => {
     searchResults.style.display = "block";
   } catch (err) {
     console.error(err);
-    searchResults.innerHTML = `<li>Error fetching data</li>`;
+    searchResults.innerHTML = `<li class='error'>Error fetching data</li>`;
     searchResults.style.display = "block";
   }
 });
