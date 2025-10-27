@@ -189,39 +189,3 @@ html, body {
     #expandedSongDisplay { width: 97vw;}
     .floating-menu,.floating-player { min-width: 78vw;}
 }
-.search-results {
-    position: absolute;
-    top: 100%; /* below input */
-    left: 0;
-    width: 100%;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    max-height: 250px;
-    overflow-y: auto;
-    list-style: none;
-    margin: 4px 0 0 0;
-    padding: 0;
-    z-index: 50;
-    display: none; /* hide initially */
-}
-
-.search-results li {
-    padding: 10px 15px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.search-results li img {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    object-fit: cover;
-}
-
-.search-results li:hover {
-    background: #f4f1ff;
-}
-
